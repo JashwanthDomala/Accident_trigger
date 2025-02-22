@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'detection',
+    'channels',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -52,10 +54,21 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'accident_detector.urls'
 
+
+# settings.py
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',  # Use only JSON renderer
+    ],
+}
+
+# settings.py
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],  # Ensure this is correctly set
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,7 +81,9 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'accident_detector.wsgi.application'
+ASGI_APPLICATION = 'accident_detector.asgi.application'
 
 
 # Database

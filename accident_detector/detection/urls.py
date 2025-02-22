@@ -1,6 +1,8 @@
+# detection/urls.py
 from django.urls import path
-from .views import AccidentAlert
+from . import views
 
 urlpatterns = [
-    path('accident/', AccidentAlert.as_view(), name='accident_alert'),  # API to receive accident alerts
+    path('', views.home, name='home'),  # Home page for video upload
+    path('process_video/', views.process_video, name='process_video'),  # Process uploaded video
 ]
