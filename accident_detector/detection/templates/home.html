@@ -5,54 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accident Detection</title>
     <style>
-        /* (Your CSS from earlier goes here) */
-        /* ... */
-        
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        /* Container */
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* Form */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        input[type="file"] {
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+
+        input[type="file"]:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Video and Result Section */
         .video-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
             margin-bottom: 20px;
         }
 
         .loading {
             color: #ffcc00;
             font-size: 1.2rem;
-            text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
+            font-weight: bold;
         }
-        
+
         .result {
             font-size: 1.5rem;
-            color: #28a745; /* Green color for success */
             text-align: center;
             margin-top: 20px;
         }
 
-        .error {
-            font-size: 1.5rem;
-            color: #dc3545; /* Red color for error */
-            text-align: center;
-            margin-top: 20px;
+        .result.success {
+            color: #28a745; /* Green for success */
         }
+
+        .result.error {
+            color: #dc3545; /* Red for error */
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
     </style>
 </head>
 <body>
-    <h1>Accident Detection System</h1>
 
-    <form action="/process_video/" method="post" enctype="multipart/form-data" id="uploadForm">
-        {% csrf_token %}
-        <label for="video">Upload Video:</label>
-        <input type="file" name="video" accept="video/*" required id="videoFile">
-        <button type="submit">Upload and Process Video</button>
-    </form>
+    <div class="container">
+        <h1>Accident Detection System</h1>
 
-    <!-- Video Display and Processing Feedback -->
-    <div class="video-container" id="videoContainer" style="display: none;">
-        <h3>Uploaded Video:</h3>
-        <video id="uploadedVideo" width="640" height="360" controls>
-            <source id="videoSource" src="" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-        <div class="loading" id="loadingMessage" style="display: none;">Processing video, please wait...</div>
-        <div class="result" id="resultMessage" style="display: none;"></div>
+        <form action="/process_video/" method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            <label for="video">Upload Video:</label>
+            <input type="file" name="video" accept="video/*" required id="videoFile">
+            <button type="submit">Upload and Process Video</button>
+        </form>
+
+        <!-- Video Display and Processing Feedback -->
+        <div class="video-container" id="videoContainer">
+            <h3>Uploaded Video:</h3>
+            <video id="uploadedVideo" controls>
+                <source id="videoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="loading" id="loadingMessage" style="display: none;">Processing video, please wait...</div>
+            <div class="result" id="resultMessage" style="display: none;"></div>
+        </div>
     </div>
 
     <script>
@@ -85,20 +185,23 @@
                 document.getElementById("loadingMessage").style.display = "none";
 
                 // Show result message
+                const resultMessage = document.getElementById("resultMessage");
                 if (data.message.includes("Accident detected")) {
-                    document.getElementById("resultMessage").innerHTML = "🚨 Accident detected!";
-                    document.getElementById("resultMessage").style.color = "#dc3545"; // Red color for error
+                    resultMessage.innerHTML = "🚨 Accident detected!";
+                    resultMessage.classList.add("error");
+                    resultMessage.classList.remove("success");
                 } else {
-                    document.getElementById("resultMessage").innerHTML = "✅ No accident detected.";
-                    document.getElementById("resultMessage").style.color = "#28a745"; // Green color for success
+                    resultMessage.innerHTML = "✅ No accident detected.";
+                    resultMessage.classList.add("success");
+                    resultMessage.classList.remove("error");
                 }
-                document.getElementById("resultMessage").style.display = "block";
+                resultMessage.style.display = "block";
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById("loadingMessage").style.display = "none";
                 document.getElementById("resultMessage").innerHTML = "❌ Error processing the video.";
-                document.getElementById("resultMessage").style.color = "#dc3545"; // Red color for error
+                document.getElementById("resultMessage").classList.add("error");
                 document.getElementById("resultMessage").style.display = "block";
             });
         };
