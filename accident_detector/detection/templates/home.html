@@ -1,20 +1,107 @@
-<!-- detection/templates/home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accident Detection</title>
+    <style>
+        /* (Your CSS from earlier goes here) */
+        /* ... */
+        
+        .video-container {
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            color: #ffcc00;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result {
+            font-size: 1.5rem;
+            color: #28a745; /* Green color for success */
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .error {
+            font-size: 1.5rem;
+            color: #dc3545; /* Red color for error */
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Accident Detection System</h1>
-    
-    <!-- Video upload form -->
-    <form action="/process_video/" method="post" enctype="multipart/form-data">
+
+    <form action="/process_video/" method="post" enctype="multipart/form-data" id="uploadForm">
         {% csrf_token %}
         <label for="video">Upload Video:</label>
-        <input type="file" name="video" accept="video/*" required>
+        <input type="file" name="video" accept="video/*" required id="videoFile">
         <button type="submit">Upload and Process Video</button>
     </form>
+
+    <!-- Video Display and Processing Feedback -->
+    <div class="video-container" id="videoContainer" style="display: none;">
+        <h3>Uploaded Video:</h3>
+        <video id="uploadedVideo" width="640" height="360" controls>
+            <source id="videoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="loading" id="loadingMessage" style="display: none;">Processing video, please wait...</div>
+        <div class="result" id="resultMessage" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById("uploadForm").onsubmit = function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var formData = new FormData();
+            var videoFile = document.getElementById("videoFile").files[0];
+            formData.append("video", videoFile);
+
+            // Show the video and loading message
+            document.getElementById("videoContainer").style.display = "block";
+            document.getElementById("videoSource").src = URL.createObjectURL(videoFile);
+            document.getElementById("uploadedVideo").load();
+
+            document.getElementById("loadingMessage").style.display = "block";
+            document.getElementById("resultMessage").style.display = "none"; // Hide result message during processing
+
+            // Send video file to server
+            fetch("/process_video/", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading message
+                document.getElementById("loadingMessage").style.display = "none";
+
+                // Show result message
+                if (data.message.includes("Accident detected")) {
+                    document.getElementById("resultMessage").innerHTML = "🚨 Accident detected!";
+                    document.getElementById("resultMessage").style.color = "#dc3545"; // Red color for error
+                } else {
+                    document.getElementById("resultMessage").innerHTML = "✅ No accident detected.";
+                    document.getElementById("resultMessage").style.color = "#28a745"; // Green color for success
+                }
+                document.getElementById("resultMessage").style.display = "block";
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById("loadingMessage").style.display = "none";
+                document.getElementById("resultMessage").innerHTML = "❌ Error processing the video.";
+                document.getElementById("resultMessage").style.color = "#dc3545"; // Red color for error
+                document.getElementById("resultMessage").style.display = "block";
+            });
+        };
+    </script>
 </body>
 </html>

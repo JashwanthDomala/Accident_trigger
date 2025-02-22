@@ -8,7 +8,7 @@ import os
 from django.core.files.storage import FileSystemStorage
 
 # Load the pre-trained model (update with the correct path)
-model = tf.keras.models.load_model('C:/Users/Student/Downloads/Accident_Detection_Model.h5')  # Use forward slashes
+model = tf.keras.models.load_model('C:/Users/Student/Downloads/Accident_Detection_Model.h5')
 
 # Home page view (allowing user to upload video)
 def home(request):
@@ -20,16 +20,16 @@ def process_video(request):
         video_file = request.FILES['video']
         fs = FileSystemStorage()
         video_path = fs.save(video_file.name, video_file)
-        video_url = fs.url(video_path)
+        video_url = fs.url(video_path)  # Get the URL of the uploaded video
         
         # Process the uploaded video
         result = process_video_file(video_path)
         
         # Provide feedback to the user
         if result:
-            return JsonResponse({'message': 'Accident detected! Video processed successfully.'})
+            return JsonResponse({'message': 'Accident detected! Video processed successfully.', 'video_url': video_url})
         else:
-            return JsonResponse({'message': 'No accident detected in the video.'})
+            return JsonResponse({'message': 'No accident detected in the video.', 'video_url': video_url})
     return JsonResponse({'message': 'Failed to upload the video.'})
 
 # Function to process the uploaded video
@@ -50,7 +50,7 @@ def process_video_file(video_path):
         # Predict accident (1) or no accident (0)
         prediction = model.predict(frame_input)
         
-        # If accident is detected (threshold of 0.5)
+        # If accident is detected (threshold of 0.9)
         if prediction > 0.9:
             accident_detected = True
             break  # Stop processing as accident is detected
@@ -61,4 +61,3 @@ def process_video_file(video_path):
     os.remove(video_path)
     
     return accident_detected
-
