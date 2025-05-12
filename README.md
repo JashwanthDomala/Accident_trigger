@@ -61,7 +61,7 @@ This project demonstrates an Accident Detection System using a pre-trained machi
      ```
 
 3. **Pre-trained Model**:
-   - Ensure that the pre-trained accident detection model (`Accident_Detection_Model.h5`) is stored at the specified location: `'C:/Users/Student/Downloads/Accident_Detection_Model.h5'`. Update the path if necessary.
+   - Ensure that the pre-trained accident detection model (`Accident_Detection_Model.h5`) is stored at the specified location: `'Accident_Detection_Model.h5'`. Update the path if necessary.
 
 4. **Start the Application**:
    - Open your browser and navigate to `http://localhost:8000/`.
